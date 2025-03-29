@@ -1,10 +1,13 @@
 <template>
   <div class="h-screen flex flex-col bg-[#09090b] text-[#e4e4e7]">
-    <div class="flex-1 overflow-hidden flex items-center">
-      <div 
-        class="h-full w-full snap-y snap-mandatory overflow-y-auto smooth-scroll" 
-        ref="scrollContainer"
-      >
+    <!-- Start Screen -->
+    <div v-if="!started" @click="startQuiz" class="h-full w-full flex items-center justify-center cursor-pointer">
+      <p class="text-2xl text-[#86efac66] animate-pulse">Tap Anywhere to Start</p>
+    </div>
+
+    <!-- Entire App -->
+    <div v-else class="flex-1 overflow-hidden flex items-center">
+      <div class="h-full w-full snap-y snap-mandatory overflow-y-auto smooth-scroll" ref="scrollContainer">
         <div 
           v-for="(question, index) in questions" 
           :key="index"
@@ -66,19 +69,6 @@ const prepareQuestions = (questionList) => {
   }))
 }
 
-// Start quiz immediately when component is mounted
-onMounted(() => {
-  questions.value = prepareQuestions(generateQuestions(1))
-  score.value = 0
-  totalAnswered.value = 0
-  currentIndex.value = 0
-  
-  // Add scroll event listener
-  if (scrollContainer.value) {
-    scrollContainer.value.addEventListener('scroll', handleScroll)
-  }
-})
-
 const selectAnswer = async (selected, questionIndex) => {
   const question = questions.value[questionIndex]
   
@@ -134,8 +124,65 @@ const handleScroll = () => {
   currentQuestion.value = Math.round(scrollPosition / containerHeight)
 }
 
+// Move viewport handling to a separate function
+const setupViewport = () => {
+  const setViewportHeight = () => {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+  }
+
+  // Initial set
+  setViewportHeight();
+
+  // Update on resize
+  window.addEventListener('resize', setViewportHeight);
+  
+  // Update on orientation change
+  window.addEventListener('orientationchange', () => {
+    setTimeout(setViewportHeight, 100);
+  });
+
+  // Update after page fully loads
+  if (document.readyState === 'complete') {
+    setViewportHeight();
+  } else {
+    window.addEventListener('load', setViewportHeight);
+  }
+}
+
+// Add new ref for start state
+const started = ref(false)
+
+// Add start function
+// Modify the start function
+const startQuiz = () => {
+  // Force viewport recalculation
+  const setViewportHeight = () => {
+    const vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', `${vh}px`);
+    // Small delay to ensure DOM update
+    setTimeout(() => {
+      started.value = true;
+      questions.value = prepareQuestions(generateQuestions(1));
+    }, 50);
+  }
+  
+  setViewportHeight();
+}
+
+// Move setupViewport call to after the quiz starts
 onMounted(() => {
-  scrollContainer.value?.addEventListener('scroll', handleScroll)
+  score.value = 0;
+  totalAnswered.value = 0;
+  currentIndex.value = 0;
+  
+  // Only setup scroll listener after quiz starts
+  watch(started, (newValue) => {
+    if (newValue && scrollContainer.value) {
+      scrollContainer.value.addEventListener('scroll', handleScroll);
+      setupViewport();
+    }
+  });
 })
 </script>
 
@@ -203,5 +250,17 @@ html, body {
   .question-box.glow-active {
     box-shadow: 0 0 20px var(--glow-color);
   }
+}
+
+.h-screen {
+  height: 100vh; /* Fallback */
+  height: calc(var(--vh, 1vh) * 100);
+  min-height: -webkit-fill-available; /* iOS Safari fix */
+}
+
+.snap-start {
+  scroll-snap-align: start;
+  height: calc(var(--vh, 1vh) * 100);
+  min-height: -webkit-fill-available; /* iOS Safari fix */
 }
 </style>
