@@ -41,7 +41,7 @@
               <p class="text-lg text-[#a1a1aa]">Score: {{ score }}/{{ totalAnswered }}</p>
               <button
                 v-if="totalAnswered >= 5"
-                @click="endQuiz"
+                @click="handleEndQuiz"
                 class="px-4 py-2 bg-[#15803d] text-white rounded-lg hover:bg-[#16a34a] transition-colors"
               >
                 End Quiz
@@ -61,135 +61,122 @@
           <div class="text-center">
             <p class="text-6xl font-bold text-[#22c55e] mb-2">{{ finalScore.percentage }}%</p>
             <p class="text-lg text-[#a1a1aa]">Correct Answers: {{ finalScore.correct }}/{{ finalScore.total }}</p>
+            <p class="text-md text-[#a1a1aa] mt-2">Playing as: {{ playerName }}</p>
+          </div>
+
+          <!-- User Score Card -->
+          <div class="mt-8">
+            <div class="flex items-center justify-between p-4 rounded-lg bg-[#27272a] border border-[#3f3f46] hover:border-[#22c55e] transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="w-8 h-8 flex items-center justify-center rounded-full bg-[#18181b] border border-[#3f3f46]">
+                  <span class="text-[#71717a] font-medium">#1</span>
+                </div>
+                <span class="text-[#e4e4e7] font-medium">{{ playerName }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-[#22c55e] font-bold">{{ finalScore.correct }}</span>
+                <span class="text-[#71717a]">correct</span>
+              </div>
+            </div>
           </div>
         </div>
         
         <button
-          @click="restartQuiz"
+          @click="handleRestartQuiz"
           class="w-full py-3 bg-[#15803d] text-white rounded-lg hover:bg-[#16a34a] transition-colors text-lg font-medium"
         >
           Play Again
         </button>
       </div>
     </div>
+    
+    <!-- Leaderboard Button -->
+    <button
+      @click="showLeaderboard = true"
+      class="fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-[#18181b] text-[#e4e4e7] rounded-full border border-[#27272a] shadow-lg hover:bg-[#27272a] transition-all z-40 flex items-center gap-2"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+      </svg>
+      Leaderboard
+    </button>
+
+    <!-- Standalone Leaderboard Modal -->
+    <div v-if="showLeaderboard && !showGameOver" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-[#18181b] rounded-lg p-8 max-w-md w-full mx-4 border border-[#27272a]">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-3xl font-bold text-[#f4f4f5] flex items-center gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#22c55e]" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+            </svg>
+            Leaderboard
+          </h2>
+          <button 
+            @click="showLeaderboard = false"
+            class="text-[#71717a] hover:text-[#e4e4e7] p-2 rounded-full hover:bg-[#27272a] transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="space-y-2 mb-6">
+          <div v-for="(entry, index) in leaderboard" :key="index" 
+            class="flex items-center justify-between p-4 rounded-lg bg-[#27272a] border border-[#3f3f46] hover:border-[#22c55e] transition-colors"
+          >
+            <div class="flex items-center gap-4">
+              <div class="w-8 h-8 flex items-center justify-center rounded-full bg-[#18181b] border border-[#3f3f46]">
+                <span class="text-[#71717a] font-medium">{{ index + 1 }}</span>
+              </div>
+              <span class="text-[#e4e4e7] font-medium">{{ entry.name }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[#22c55e] font-bold">{{ entry.score }}</span>
+              <span class="text-[#71717a]">correct</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
-
 <script setup>
-import { ref, onMounted } from 'vue'
-import { generateQuestions, generateRandomQuestion } from '~/utils/mathQuestions'
+import { onMounted } from 'vue'
+import { useQuiz } from '~/composables/useQuiz'
+import { useLeaderboard } from '~/composables/useLeaderboard'
+import { useUIEffects } from '~/composables/useUIEffects'
 
-const score = ref(0)
-const questions = ref([])
-const scrollContainer = ref(null)
-const totalAnswered = ref(0)
-const currentIndex = ref(0)
-const showGameOver = ref(false)
-const finalScore = ref({
-  correct: 0,
-  total: 0,
-  percentage: 0
-})
+const { 
+  score, questions, totalAnswered, showGameOver, 
+  finalScore, selectAnswer, endQuiz, restartQuiz, initQuiz 
+} = useQuiz()
 
-const endQuiz = () => {
-  finalScore.value = {
-    correct: score.value,
-    total: totalAnswered.value,
-    percentage: Math.round((score.value / totalAnswered.value) * 100)
-  }
-  showGameOver.value = true
-}
+const {
+  playerName, showLeaderboard, leaderboard, generateNewPlayerName
+} = useLeaderboard()
 
-const restartQuiz = () => {
-  questions.value = prepareQuestions(generateQuestions(1))
-  score.value = 0
-  totalAnswered.value = 0
-  currentIndex.value = 0
-  showGameOver.value = false
-  scrollContainer.value.scrollTo({ top: 0, behavior: 'smooth' })
-}
+const {
+  currentQuestion, scrollContainer, getRandomGlowColor, handleScroll
+} = useUIEffects()
 
-// Prepare questions with additional properties
-const prepareQuestions = (questionList) => {
-  return questionList.map(q => ({
-    ...q,
-    answered: false,
-    selectedAnswer: null
-  }))
-}
-
-// Start quiz immediately when component is mounted
 onMounted(() => {
-  questions.value = prepareQuestions(generateQuestions(1))
-  score.value = 0
-  totalAnswered.value = 0
-  currentIndex.value = 0
-  
-  // Add scroll event listener
+  initQuiz()
   if (scrollContainer.value) {
     scrollContainer.value.addEventListener('scroll', handleScroll)
   }
 })
 
-const selectAnswer = async (selected, questionIndex) => {
-  const question = questions.value[questionIndex]
-  
-  // Skip if already answered
-  if (question.answered) return
-  
-  // Mark as answered
-  question.answered = true
-  question.selectedAnswer = selected
-  totalAnswered.value++
-  
-  // Update score if correct
-  if (selected === question.correct) {
-    score.value++
-  }
-  
-  // Add a new question if we're near the end
-  if (questionIndex >= questions.value.length - 2) {
-    const newQuestion = generateRandomQuestion()
-    questions.value.push({
-      ...newQuestion,
-      answered: false,
-      selectedAnswer: null
-    })
-  }
-  
-  // Increment current index to show the next question
-  currentIndex.value++
-  
-  // No auto-scrolling - let the user scroll manually when ready
+const handleEndQuiz = async () => {
+  endQuiz()
+  generateNewPlayerName()
+  await addScore(finalScore.value.correct, finalScore.value.total)
 }
 
-// Update the colors to be more subtle and green-focused
-const glowColors = [
-  '#4ade8066',  // Mint green
-  '#22c55e66',  // Medium green
-  '#15803d66',  // Forest green
-  '#16a34a66',  // Spring green
-  '#86efac66',  // Light green
-  '#4ade8066',  // Sage green
-]
-
-const getRandomGlowColor = (index) => {
-  return glowColors[index % glowColors.length]
+const handleRestartQuiz = () => {
+  restartQuiz(scrollContainer.value)
 }
-
-const currentQuestion = ref(0)
-
-const handleScroll = () => {
-  if (!scrollContainer.value) return
-  const containerHeight = scrollContainer.value.clientHeight
-  const scrollPosition = scrollContainer.value.scrollTop
-  currentQuestion.value = Math.round(scrollPosition / containerHeight)
-}
-
-onMounted(() => {
-  scrollContainer.value?.addEventListener('scroll', handleScroll)
-})
 </script>
 
 <style>
@@ -212,7 +199,6 @@ html, body {
   scroll-snap-align: start;
 }
 
-/* Hide scrollbar but allow scrolling */
 .overflow-y-auto {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -259,15 +245,15 @@ html, body {
 }
 
 .h-screen {
-  height: 100vh; /* Fallback */
+  height: 100vh;
   height: calc(var(--vh, 1vh) * 100);
-  min-height: -webkit-fill-available; /* iOS Safari fix */
+  min-height: -webkit-fill-available;
 }
 
 .snap-start {
   scroll-snap-align: start;
   height: calc(var(--vh, 1vh) * 100);
-  min-height: -webkit-fill-available; /* iOS Safari fix */
+  min-height: -webkit-fill-available;
 }
 
 @keyframes fadeIn {
