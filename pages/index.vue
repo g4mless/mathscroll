@@ -1,5 +1,16 @@
 <template>
   <div class="h-screen flex flex-col bg-[#09090b] text-[#e4e4e7]">
+    <!-- Start Screen -->
+    <div v-if="!gameStarted" 
+      @click="startGame"
+      class="fixed inset-0 bg-[#09090b] flex items-center justify-center z-50 cursor-pointer"
+    >
+      <div class="text-center animate-pulse">
+        <h1 class="text-4xl font-bold text-[#f4f4f5] mb-4">Math Quiz</h1>
+        <p class="text-[#a1a1aa]">Tap anywhere to start</p>
+      </div>
+    </div>
+
     <div class="flex-1 overflow-hidden">
       <div 
         class="h-full snap-y snap-mandatory overflow-y-auto smooth-scroll" 
@@ -121,7 +132,7 @@
           </button>
         </div>
 
-        <div class="space-y-2 mb-6">
+        <div class="space-y-2 mb-6 h-[400px] overflow-y-auto pr-2 scrollbar-thin">
           <div v-for="(entry, index) in leaderboard" :key="index" 
             class="flex items-center justify-between p-4 rounded-lg bg-[#27272a] border border-[#3f3f46] hover:border-[#22c55e] transition-colors"
           >
@@ -143,18 +154,26 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useQuiz } from '~/composables/useQuiz'
 import { useLeaderboard } from '~/composables/useLeaderboard'
 import { useUIEffects } from '~/composables/useUIEffects'
+
+const gameStarted = ref(false)
+
+const startGame = () => {
+  gameStarted.value = true
+  initQuiz()
+}
 
 const { 
   score, questions, totalAnswered, showGameOver, 
   finalScore, selectAnswer, endQuiz, restartQuiz, initQuiz 
 } = useQuiz()
 
-const {
-  playerName, showLeaderboard, leaderboard, generateNewPlayerName
+const { 
+  playerName, showLeaderboard, leaderboard, 
+  generateNewPlayerName, addScore 
 } = useLeaderboard()
 
 const {
@@ -222,11 +241,11 @@ html, body {
 
 @media (max-width: 640px) {
   .question-box {
-    margin: 1rem;
+    margin: 0.6rem;
   }
   
   .text-6xl {
-    font-size: 4rem;
+    font-size: 2.5rem;
   }
   
   .text-4xl {
@@ -263,5 +282,23 @@ html, body {
 
 .fixed {
   animation: fadeIn 0.3s ease-in-out;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #27272a;
+  border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
 }
 </style>

@@ -1,13 +1,15 @@
 import { ref } from 'vue'
+import { useSupabase } from './useSupabase'
 
 export const useLeaderboard = () => {
+  const { client } = useSupabase()
   const playerName = ref('')
   const isSubmitting = ref(false)
   const showLeaderboard = ref(false)
   const leaderboard = ref([])
 
   const generateUsername = () => {
-    const randomNum = Math.floor(1000 + Math.random() * 9000)
+    const randomNum = Math.floor(1000 + Math.random() * 9001)
     return `Player#${randomNum}`
   }
 
@@ -17,7 +19,7 @@ export const useLeaderboard = () => {
 
   const fetchLeaderboard = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('leaderboard')
         .select('*')
         .order('score', { ascending: false })
@@ -33,7 +35,7 @@ export const useLeaderboard = () => {
   const addScore = async (score, total) => {
     try {
       isSubmitting.value = true
-      const { error } = await supabase
+      const { error } = await client
         .from('leaderboard')
         .insert([
           {
