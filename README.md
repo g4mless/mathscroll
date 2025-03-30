@@ -7,6 +7,7 @@ Doomscroll into a math quiz and compete with others for a higher correct answer 
 ## Tech Stack
 - Nuxt
 - Supabase
+
 Why do i use this ? because it's green
 
 
