@@ -6,7 +6,7 @@
       class="fixed inset-0 bg-[#09090b] flex items-center justify-center z-50 cursor-pointer"
     >
       <div class="text-center animate-pulse">
-        <h1 class="text-4xl font-bold text-[#f4f4f5] mb-4">Math Quiz</h1>
+        <h1 class="text-4xl font-bold text-[#f4f4f5] mb-4">MathScroll</h1>
         <p class="text-[#a1a1aa]">Tap anywhere to start</p>
       </div>
     </div>
