@@ -39,9 +39,37 @@
             
             <div class="mt-4 flex justify-between items-center">
               <p class="text-lg text-[#a1a1aa]">Score: {{ score }}/{{ totalAnswered }}</p>
+              <button
+                v-if="totalAnswered >= 5"
+                @click="endQuiz"
+                class="px-4 py-2 bg-[#15803d] text-white rounded-lg hover:bg-[#16a34a] transition-colors"
+              >
+                End Quiz
+              </button>
             </div>
           </div>
         </div>
+      </div>
+    </div>
+    
+    <!-- Game Over Modal -->
+    <div v-if="showGameOver" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div class="bg-[#18181b] rounded-lg p-8 max-w-md w-full mx-4 border border-[#27272a]">
+        <h2 class="text-3xl font-bold text-center mb-6 text-[#f4f4f5]">Quiz Ended</h2>
+        
+        <div class="space-y-4 mb-8">
+          <div class="text-center">
+            <p class="text-6xl font-bold text-[#22c55e] mb-2">{{ finalScore.percentage }}%</p>
+            <p class="text-lg text-[#a1a1aa]">Correct Answers: {{ finalScore.correct }}/{{ finalScore.total }}</p>
+          </div>
+        </div>
+        
+        <button
+          @click="restartQuiz"
+          class="w-full py-3 bg-[#15803d] text-white rounded-lg hover:bg-[#16a34a] transition-colors text-lg font-medium"
+        >
+          Play Again
+        </button>
       </div>
     </div>
   </div>
@@ -57,6 +85,30 @@ const questions = ref([])
 const scrollContainer = ref(null)
 const totalAnswered = ref(0)
 const currentIndex = ref(0)
+const showGameOver = ref(false)
+const finalScore = ref({
+  correct: 0,
+  total: 0,
+  percentage: 0
+})
+
+const endQuiz = () => {
+  finalScore.value = {
+    correct: score.value,
+    total: totalAnswered.value,
+    percentage: Math.round((score.value / totalAnswered.value) * 100)
+  }
+  showGameOver.value = true
+}
+
+const restartQuiz = () => {
+  questions.value = prepareQuestions(generateQuestions(1))
+  score.value = 0
+  totalAnswered.value = 0
+  currentIndex.value = 0
+  showGameOver.value = false
+  scrollContainer.value.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 // Prepare questions with additional properties
 const prepareQuestions = (questionList) => {
@@ -216,5 +268,14 @@ html, body {
   scroll-snap-align: start;
   height: calc(var(--vh, 1vh) * 100);
   min-height: -webkit-fill-available; /* iOS Safari fix */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fixed {
+  animation: fadeIn 0.3s ease-in-out;
 }
 </style>
