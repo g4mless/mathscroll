@@ -1,75 +1,45 @@
-# Nuxt Minimal Starter
+<img align="right" width="48" height="48" src="https://raw.githubusercontent.com/g4mless/mathscroll/refs/heads/main/icon.png" alt="mathscroll favicon">
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+# MathScroll
+Doomscroll into a math quiz and compete with others for a higher correct answer count! 💢.
 
-## Setup
 
-Make sure to install dependencies:
+## Tech Stack
+- Nuxt
+- Supabase
+Why do i use this ? because it's green
+
+
+## Features
+
+- New random question every time it's answered
+- Random number of choices
+- Dark Mode Only
+- Leaderboard
+- Unresponsive UI
+
+## Contribute
+Feel free to contribute to this project by forking it and submitting a pull request. (Please fix my code)
+
+## Installation
+
+Install with bun
 
 ```bash
-# npm
-npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
+git clone https://github.com/g4mless/mathscroll.git
 ```
-
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
 ```bash
-# npm
-npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
+bun Install
+```
+```bash
 bun run dev
 ```
+    
+## Screenshots
 
-## Production
+![Main App](https://raw.githubusercontent.com/g4mless/mathscroll/refs/heads/main/readme-img/main.png)
 
-Build the application for production:
+![Leaderboard](https://github.com/g4mless/mathscroll/blob/main/readme-img/leaderboard.png?raw=true)
 
-```bash
-# npm
-npm run build
+![End Screen](https://github.com/g4mless/mathscroll/blob/main/readme-img/end.png?raw=true)
 
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
-```
-
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
