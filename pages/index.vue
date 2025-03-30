@@ -1,13 +1,10 @@
 <template>
   <div class="h-screen flex flex-col bg-[#09090b] text-[#e4e4e7]">
-    <!-- Start Screen -->
-    <div v-if="!started" @click="startQuiz" class="h-full w-full flex items-center justify-center cursor-pointer">
-      <p class="text-2xl text-[#86efac66] animate-pulse">Tap Anywhere to Start</p>
-    </div>
-
-    <!-- Entire App -->
-    <div v-else class="flex-1 overflow-hidden flex items-center">
-      <div class="h-full w-full snap-y snap-mandatory overflow-y-auto smooth-scroll" ref="scrollContainer">
+    <div class="flex-1 overflow-hidden">
+      <div 
+        class="h-full snap-y snap-mandatory overflow-y-auto smooth-scroll" 
+        ref="scrollContainer"
+      >
         <div 
           v-for="(question, index) in questions" 
           :key="index"
@@ -15,7 +12,7 @@
           :id="`question-${index}`"
         >
           <div 
-            class="bg-[#18181b] rounded-lg shadow-lg p-6 max-w-md w-full border border-[#27272a] question-box mx-auto"
+            class="bg-[#18181b] rounded-lg shadow-lg p-6 max-w-md w-full border border-[#27272a] question-box"
             :class="{ 'glow-active': currentQuestion === index }"
             :style="{ '--glow-color': getRandomGlowColor(index) }"
           >
@@ -61,6 +58,7 @@ const scrollContainer = ref(null)
 const totalAnswered = ref(0)
 const currentIndex = ref(0)
 
+// Prepare questions with additional properties
 const prepareQuestions = (questionList) => {
   return questionList.map(q => ({
     ...q,
@@ -68,6 +66,19 @@ const prepareQuestions = (questionList) => {
     selectedAnswer: null
   }))
 }
+
+// Start quiz immediately when component is mounted
+onMounted(() => {
+  questions.value = prepareQuestions(generateQuestions(1))
+  score.value = 0
+  totalAnswered.value = 0
+  currentIndex.value = 0
+  
+  // Add scroll event listener
+  if (scrollContainer.value) {
+    scrollContainer.value.addEventListener('scroll', handleScroll)
+  }
+})
 
 const selectAnswer = async (selected, questionIndex) => {
   const question = questions.value[questionIndex]
@@ -124,65 +135,8 @@ const handleScroll = () => {
   currentQuestion.value = Math.round(scrollPosition / containerHeight)
 }
 
-// Move viewport handling to a separate function
-const setupViewport = () => {
-  const setViewportHeight = () => {
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-  }
-
-  // Initial set
-  setViewportHeight();
-
-  // Update on resize
-  window.addEventListener('resize', setViewportHeight);
-  
-  // Update on orientation change
-  window.addEventListener('orientationchange', () => {
-    setTimeout(setViewportHeight, 100);
-  });
-
-  // Update after page fully loads
-  if (document.readyState === 'complete') {
-    setViewportHeight();
-  } else {
-    window.addEventListener('load', setViewportHeight);
-  }
-}
-
-// Add new ref for start state
-const started = ref(false)
-
-// Add start function
-// Modify the start function
-const startQuiz = () => {
-  // Force viewport recalculation
-  const setViewportHeight = () => {
-    const vh = window.innerHeight * 0.01;
-    document.documentElement.style.setProperty('--vh', `${vh}px`);
-    // Small delay to ensure DOM update
-    setTimeout(() => {
-      started.value = true;
-      questions.value = prepareQuestions(generateQuestions(1));
-    }, 50);
-  }
-  
-  setViewportHeight();
-}
-
-// Move setupViewport call to after the quiz starts
 onMounted(() => {
-  score.value = 0;
-  totalAnswered.value = 0;
-  currentIndex.value = 0;
-  
-  // Only setup scroll listener after quiz starts
-  watch(started, (newValue) => {
-    if (newValue && scrollContainer.value) {
-      scrollContainer.value.addEventListener('scroll', handleScroll);
-      setupViewport();
-    }
-  });
+  scrollContainer.value?.addEventListener('scroll', handleScroll)
 })
 </script>
 
@@ -230,15 +184,15 @@ html, body {
 
 @media (max-width: 640px) {
   .question-box {
-    margin: 0.75rem;
+    margin: 1rem;
   }
   
   .text-6xl {
-    font-size: 2.5rem;
+    font-size: 4rem;
   }
   
   .text-4xl {
-    font-size: 1.75rem;
+    font-size: 2rem;
   }
 }
 
