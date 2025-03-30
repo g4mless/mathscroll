@@ -187,10 +187,13 @@ onMounted(() => {
   }
 })
 
+const playerRank = ref(1)
+
 const handleEndQuiz = async () => {
   endQuiz()
   generateNewPlayerName()
-  await addScore(finalScore.value.correct, finalScore.value.total)
+  const rank = await addScore(finalScore.value.correct, finalScore.value.total)
+  playerRank.value = rank
 }
 
 const handleRestartQuiz = () => {

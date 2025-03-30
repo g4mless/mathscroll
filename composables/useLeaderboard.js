@@ -47,9 +47,19 @@ export const useLeaderboard = () => {
         ])
 
       if (error) throw error
+      
+      const { data: rankData } = await client
+        .from('leaderboard')
+        .select('id')
+        .gte('score', score)
+        .order('score', { ascending: false })
+
       await fetchLeaderboard()
+      return rankData ? rankData.length : 1
+      
     } catch (error) {
       console.error('Error adding score:', error)
+      return 1
     } finally {
       isSubmitting.value = false
     }
