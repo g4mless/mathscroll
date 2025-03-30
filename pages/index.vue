@@ -80,7 +80,7 @@
             <div class="flex items-center justify-between p-4 rounded-lg bg-[#27272a] border border-[#3f3f46] hover:border-[#22c55e] transition-colors">
               <div class="flex items-center gap-4">
                 <div class="w-8 h-8 flex items-center justify-center rounded-full bg-[#18181b] border border-[#3f3f46]">
-                  <span class="text-[#71717a] font-medium">#1</span>
+                  <span class="text-[#71717a] font-medium">#{{ leaderboard.length + 1 }}</span>
                 </div>
                 <span class="text-[#e4e4e7] font-medium">{{ playerName }}</span>
               </div>
