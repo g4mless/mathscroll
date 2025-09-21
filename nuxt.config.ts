@@ -12,9 +12,5 @@ export default defineNuxtConfig({
     "/**": { prerender: true }
   },
   runtimeConfig: {
-    public: {
-      supabaseUrl: process.env.NUXT_PUBLIC_SUPABASE_URL,
-      supabaseKey: process.env.NUXT_PUBLIC_SUPABASE_KEY,
-    }
   }
 });

@@ -72,23 +72,6 @@
           <div class="text-center">
             <p class="text-6xl font-bold text-[#22c55e] mb-2">{{ finalScore.percentage }}%</p>
             <p class="text-lg text-[#a1a1aa]">Correct Answers: {{ finalScore.correct }}/{{ finalScore.total }}</p>
-            <p class="text-md text-[#a1a1aa] mt-2">Playing as: {{ playerName }}</p>
-          </div>
-
-          <!-- User Score Card -->
-          <div class="mt-8">
-            <div class="flex items-center justify-between p-4 rounded-lg bg-[#27272a] border border-[#3f3f46] hover:border-[#22c55e] transition-colors">
-              <div class="flex items-center gap-4">
-                <div class="w-8 h-8 flex items-center justify-center rounded-full bg-[#18181b] border border-[#3f3f46]">
-                  <span class="text-[#71717a] font-medium">#{{ playerRank }}</span>
-                </div>
-                <span class="text-[#e4e4e7] font-medium">{{ playerName }}</span>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-[#22c55e] font-bold">{{ finalScore.correct }}</span>
-                <span class="text-[#71717a]">correct</span>
-              </div>
-            </div>
           </div>
         </div>
         
@@ -101,62 +84,13 @@
       </div>
     </div>
     
-    <!-- Leaderboard Button -->
-    <button
-      @click="showLeaderboard = true"
-      class="fixed bottom-6 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-[#18181b] text-[#e4e4e7] rounded-full border border-[#27272a] shadow-lg hover:bg-[#27272a] transition-all z-40 flex items-center gap-2"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-      </svg>
-      Leaderboard
-    </button>
 
-    <!-- Standalone Leaderboard Modal -->
-    <div v-if="showLeaderboard && !showGameOver" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div class="bg-[#18181b] rounded-lg p-8 max-w-md w-full mx-4 border border-[#27272a]">
-        <div class="flex justify-between items-center mb-6">
-          <h2 class="text-3xl font-bold text-[#f4f4f5] flex items-center gap-3">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#22c55e]" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-            </svg>
-            Leaderboard
-          </h2>
-          <button 
-            @click="showLeaderboard = false"
-            class="text-[#71717a] hover:text-[#e4e4e7] p-2 rounded-full hover:bg-[#27272a] transition-colors"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-            </svg>
-          </button>
-        </div>
-
-        <div class="space-y-2 mb-6 h-[400px] overflow-y-auto pr-2 scrollbar-thin">
-          <div v-for="(entry, index) in leaderboard" :key="index" 
-            class="flex items-center justify-between p-4 rounded-lg bg-[#27272a] border border-[#3f3f46] hover:border-[#22c55e] transition-colors"
-          >
-            <div class="flex items-center gap-4">
-              <div class="w-8 h-8 flex items-center justify-center rounded-full bg-[#18181b] border border-[#3f3f46]">
-                <span class="text-[#71717a] font-medium">{{ index + 1 }}</span>
-              </div>
-              <span class="text-[#e4e4e7] font-medium">{{ entry.name }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <span class="text-[#22c55e] font-bold">{{ entry.score }}</span>
-              <span class="text-[#71717a]">correct</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useQuiz } from '~/composables/useQuiz'
-import { useLeaderboard } from '~/composables/useLeaderboard'
 import { useUIEffects } from '~/composables/useUIEffects'
 
 const gameStarted = ref(false)
@@ -171,10 +105,6 @@ const {
   finalScore, selectAnswer, endQuiz, restartQuiz, initQuiz 
 } = useQuiz()
 
-const { 
-  playerName, showLeaderboard, leaderboard, 
-  generateNewPlayerName, addScore 
-} = useLeaderboard()
 
 const {
   currentQuestion, scrollContainer, getRandomGlowColor, handleScroll
@@ -187,13 +117,9 @@ onMounted(() => {
   }
 })
 
-const playerRank = ref(1)
 
 const handleEndQuiz = async () => {
   endQuiz()
-  generateNewPlayerName()
-  const rank = await addScore(finalScore.value.correct, finalScore.value.total)
-  playerRank.value = rank
 }
 
 const handleRestartQuiz = () => {
